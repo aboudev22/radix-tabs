@@ -1,30 +1,10 @@
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 export default function App() {
   const tabs = ["Account", "Password", "Settings"];
-  const tabsRef = useRef<HTMLParagraphElement[]>([]);
-  const [selected, setSelected] = useState<HTMLElement | null>(null);
-  const [selectProps, setSelectProps] = useState({ left: 0, width: 0 });
-
-  const handleSelected = (index: number) => {
-    setSelected(tabsRef.current[index]);
-  };
-
-  useEffect(() => {
-    if (!selected) return;
-    setSelectProps({
-      left: selected.offsetLeft,
-      width: selected.offsetWidth,
-    });
-  }, [selected]);
-
-  useLayoutEffect(() => {
-    if (tabsRef.current[0] && selected === null) {
-      setSelected(tabsRef.current[0]);
-    }
-  }, [selected]);
+  const [selected, setSelected] = useState(tabs[0]);
 
   return (
     <div className="w-screen h-screen flex justify-center items-center bg-transparent">
@@ -32,10 +12,10 @@ export default function App() {
         layout
         transition={{ delay: 0.2 }}
         className={clsx(
-          "relative bg-neutral-900/50 rounded-md border-2 border-neutral-400 overflow-hidden",
-          selected?.textContent === "Account"
+          "rounded-md bg-neutral-900 border-2 border-neutral-400 overflow-hidden",
+          selected === "Account"
             ? "h-56"
-            : selected?.textContent === "Password"
+            : selected === "Password"
             ? "h-40"
             : "h-36"
         )}
@@ -46,40 +26,37 @@ export default function App() {
           className="flex px-4 gap-4 border-b-2 border-neutral-400 relative"
         >
           {tabs.map((item, index) => (
-            <motion.p
-              layout
+            <div
               key={item}
-              ref={(el) => {
-                if (el) tabsRef.current[index] = el;
-              }}
-              onClick={() => handleSelected(index)}
-              className={clsx(
-                "flex items-center justify-center px-8 py-3 text-xs cursor-pointer transition-all",
-                selected?.textContent === tabsRef.current[index]?.textContent
-                  ? "text-white"
-                  : "text-neutral-400 hover:text-white"
-              )}
+              onClick={() => setSelected(tabs[index])}
+              className="relative"
             >
-              {item}
-            </motion.p>
+              <motion.p
+                layout
+                className={clsx(
+                  "flex items-center justify-center px-8 py-3 text-xs cursor-pointer transition-all",
+                  selected === tabs[index]
+                    ? "text-white"
+                    : "text-neutral-400 hover:text-white"
+                )}
+              >
+                {item}
+              </motion.p>
+              {/* Underline */}
+              {item === selected && (
+                <motion.div
+                  layoutId="underline"
+                  className="absolute w-full h-[2px] bg-pink-500 bottom-0"
+                />
+              )}
+            </div>
           ))}
-
-          {/* Underline */}
-          <motion.div
-            layout
-            layoutId="underline"
-            animate={{
-              left: selectProps.left,
-              width: selectProps.width,
-            }}
-            className="absolute h-[2px] bg-pink-500 bottom-0"
-          />
         </motion.section>
         {/* Content */}
         <AnimatePresence mode="wait">
-          {selected?.textContent === "Account" && <Account key="Account" />}
-          {selected?.textContent === "Password" && <Password key="Password" />}
-          {selected?.textContent === "Settings" && <Settings key="Settings" />}
+          {selected === "Account" && <Account key="Account" />}
+          {selected === "Password" && <Password key="Password" />}
+          {selected === "Settings" && <Settings key="Settings" />}
         </AnimatePresence>
       </motion.div>
     </div>
